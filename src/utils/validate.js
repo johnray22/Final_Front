@@ -15,8 +15,9 @@ export function isExternal(path) {
  * @returns {Boolean}
  */
 export function validUsername(str) {
-  const valid_map = ['admin', 'editor']
-  return valid_map.indexOf(str.trim()) >= 0
+  // const valid_map = []
+  // return valid_map.indexOf(str.trim()) >= 0
+  return str.length > 3
 }
 
 /**
@@ -27,7 +28,18 @@ export function validURL(url) {
   const reg = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/
   return reg.test(url)
 }
-
+export function validVeriCode(str) {
+  const reg = /^[0-9]\d{5}$/
+  return reg.test(str)
+}
+/**
+ * @param str
+ * @returns {boolean}
+ */
+export function validPhone(str) {
+  const reg = /^1(2|3|4|5|6|7|8|9)\d{9}$/
+  return reg.test(str)
+}
 /**
  * @param {string} str
  * @returns {Boolean}

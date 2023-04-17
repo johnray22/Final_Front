@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/user'
+import {login, logout, getInfo, codelogin, codeLogin} from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
@@ -34,9 +34,22 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
+        const { body } = response
+        commit('SET_TOKEN', body.tokenId)
+        setToken(body.tokenId)
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+  codelogin({ commit }, userInfo) {
+    const { phone, code } = userInfo
+    return new Promise((resolve, reject) => {
+      codeLogin({ phone: phone.trim(), code: code }).then(response => {
+        const { body } = response
+        commit('SET_TOKEN', body.tokenId)
+        setToken(body.tokenId)
         resolve()
       }).catch(error => {
         reject(error)
@@ -48,21 +61,18 @@ const actions = {
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getInfo(state.token).then(response => {
-        const { data } = response
-
+        const data = response.body
         if (!data) {
-          reject('Verification failed, please Login again.')
+          reject('验证失败，请重新登录。')
         }
-
-        const { roles, name, avatar, introduction } = data
-
+        const { roles, id, username, avatar, introduction } = data
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
           reject('getInfo: roles must be a non-null array!')
         }
-
         commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
+        commit('SET_USERID', id)
+        commit('SET_NAME', username)
         commit('SET_AVATAR', avatar)
         commit('SET_INTRODUCTION', introduction)
         resolve(data)

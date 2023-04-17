@@ -71,6 +71,11 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/register',
+    component: () => import('@/views/register/index'),
+    hidden: true
+  },
+  {
     path: '/',
     component: Layout,
     redirect: '/dashboard',
@@ -79,10 +84,11 @@ export const constantRoutes = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
-        meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
+        meta: { title: '主面板', icon: 'dashboard', affix: true }
       }
     ]
   },
+  tableRouter,
   {
     path: '/documentation',
     component: Layout,
@@ -91,7 +97,7 @@ export const constantRoutes = [
         path: 'index',
         component: () => import('@/views/documentation/index'),
         name: 'Documentation',
-        meta: { title: 'Documentation', icon: 'documentation', affix: true }
+        meta: { title: '文档查询', icon: 'documentation', affix: true }
       }
     ]
   },
@@ -104,7 +110,7 @@ export const constantRoutes = [
         path: 'index',
         component: () => import('@/views/guide/index'),
         name: 'Guide',
-        meta: { title: 'Guide', icon: 'guide', noCache: true }
+        meta: { title: '操作引导', icon: 'guide', noCache: true }
       }
     ]
   },
@@ -136,7 +142,7 @@ export const asyncRoutes = [
     alwaysShow: true, // will always show the root menu
     name: 'Permission',
     meta: {
-      title: 'Permission',
+      title: '权限管理',
       icon: 'lock',
       roles: ['admin', 'editor'] // you can set roles in root nav
     },
@@ -188,7 +194,6 @@ export const asyncRoutes = [
   componentsRouter,
   chartsRouter,
   nestedRouter,
-  tableRouter,
 
   {
     path: '/example',

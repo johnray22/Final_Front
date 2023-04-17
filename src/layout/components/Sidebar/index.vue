@@ -1,3 +1,4 @@
+<script src="../../../router/index.js"></script>
 <template>
   <div :class="{'has-logo':showLogo}">
     <logo v-if="showLogo" :collapse="isCollapse" />

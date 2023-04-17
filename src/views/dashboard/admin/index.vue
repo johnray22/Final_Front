@@ -1,3 +1,4 @@
+<script src="../../../router/index.js"></script>
 <template>
   <div class="dashboard-editor-container">
     <github-corner class="github-corner" />
