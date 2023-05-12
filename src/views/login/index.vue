@@ -123,7 +123,7 @@
       <br>
       <social-sign />
     </el-dialog>
-    <div class="botText" style="position: absolute;bottom: 8px;display: flex;width: 100%;justify-content: center;font-size: 16px;color: #e6e6e6">渝ICP备2020012345号-1</div>
+    <div class="botText" style="position: absolute;bottom: 8px;display: flex;width: 100%;justify-content: center;font-size: 16px;color: #e6e6e6"><a href="https://beian.miit.gov.cn/" target="_blank">渝ICP备2020012345号-1</a></div>
 
   </div>
 </template>

@@ -1,211 +1,202 @@
-<script src="../../api/user.js"></script>
 <template>
-  <div class="dashboard-container">
-    <div id="map" style="height: 1024px;"></div>
-  </div>
+    <div class="map-container">
+      <div id="map-app">
+
+      </div>
+    </div>
 </template>
-
 <script>
-import * as echarts from 'echarts';
-import dataJson from "../../assets/mapdata.json";
+import {TMap} from "@/utils/initMap";
+import {getLatestInfos} from "@/api/dashboard";
 export default {
-  name: 'Dashboard',
+  name: 'App',
+  components: {
 
+  },
   data() {
-    return {
-      entity:'',
-      dataList:[
-        {name: '北京',value: this.randomData() },
-        {name: '天津',value: this.randomData() },
-        {name: '上海',value: this.randomData() },
-        {name: '重庆',value: this.randomData() },
-        {name: '河北',value: this.randomData() },
-        {name: '河南',value: this.randomData() },
-        {name: '云南',value: this.randomData() },
-        {name: '辽宁',value: this.randomData() },
-        {name: '黑龙江',value: this.randomData() },
-        {name: '湖南',value: this.randomData() },
-        {name: '安徽',value: this.randomData() },
-        {name: '山东',value: this.randomData() },
-        {name: '新疆',value: 0 },
-        {name: '江苏',value: this.randomData() },
-        {name: '浙江',value: this.randomData() },
-        {name: '江西',value: this.randomData() },
-        {name: '湖北',value: this.randomData() },
-        {name: '广西',value: this.randomData() },
-        {name: '甘肃',value: this.randomData() },
-        {name: '山西',value: this.randomData() },
-        {name: '内蒙古',value: this.randomData() },
-        {name: '陕西',value: this.randomData() },
-        {name: '吉林',value: this.randomData() },
-        {name: '福建',value: this.randomData() },
-        {name: '贵州',value: this.randomData() },
-        {name: '广东',value: this.randomData() },
-        {name: '青海',value: this.randomData() },
-        {name: '西藏',value: this.randomData() },
-        {name: '四川',value: this.randomData() },
-        {name: '宁夏',value: this.randomData() },
-        {name: '海南',value: this.randomData() },
-        {name: '台湾',value: this.randomData() },
-        {name: '香港',value: this.randomData() },
-        {name: '澳门',value: this.randomData() }
-      ]
-
+    return{
+      markerArr:[],
+      qq:'',
+      tMap:'',
+      mapMode: 'roadmap',
+      records:[],
+      markers:[]
     }
-  },
-  computed: {
-
-  },
-  created() {
-    console.log(echarts);
-
   },
   mounted() {
-    console.log(echarts);
-    this.drawMap()
+    this.createMap()
+    // 定时器每 10 秒运行一次
+    setInterval(() => {
+      this.refreshMarkers();
+    }, 10000);
   },
   methods:{
-    randomData() {
-      return Math.round(Math.random()*500);
+    // 用于获取新的数据并更新标记
+    async refreshMarkers() {
+      // 获取新的数据
+      await this.getData();
+
+      // 删除现有的标记
+      this.markers.forEach(marker => {
+        marker.setMap(null);
+      });
+
+      // 清空 markers 数组
+      this.markers = [];
+
+      // 添加新的标记
+      this.drawPoints();
     },
-    drawMap(){
-      let longti = 106.52669833333333;
-      let lati = 29.594877333333333;
+    async createMap(){
+      await this.getData()
+      await this.TencentMap()
+    },
+    async getData(){
+      const res = await getLatestInfos()
+      console.log('res',res)
+      this.records=res.body
+    },
+    async drawPoints(){
+      // 遍历 body 数组
+      this.records.forEach((point) => {
+        const { longti, lati } = point;
+        this.addMarker({ longitude: longti, latitude: lati }, point);
+      });
+    },
 
-      this.entity=echarts.init(document.getElementById('map'), '');
-      let uploadDataUrl = dataJson;
-      // 注册地图
-      echarts.registerMap("china", uploadDataUrl);
-      this.entity.setOption({
-        title: {
-          text: '地图分布',
-          x: 'center',
-          textStyle: {
-            color: '#fff',
-            fontSize:"40"
-          }
-        },
-        tooltip: {
-          show: true, // 是否显示
-          trigger: 'axis', // 触发类型  'item'图形触发：散点图，饼图等无类目轴的图表中使用； 'axis'坐标轴触发；'none'：什么都不触发。
-          axisPointer: { // 坐标轴指示器配置项。
-            type: 'shadow', // 'line' 直线指示器  'shadow' 阴影指示器  'none' 无指示器  'cross' 十字准星指示器。
-            axis: 'auto', // 指示器的坐标轴。
-            snap: true, // 坐标轴指示器是否自动吸附到点上
-          },
-          showContent: true, //是否显示提示框浮层，默认显示。
-          triggerOn: 'mouseover', // 触发时机  'mouseover'鼠标移动时触发。     'click'鼠标点击时触发。  'mousemove|click'同时鼠标移动和点击时触发。
-          enterable: false, // 鼠标是否可进入提示框浮层中，默认为false，如需详情内交互，如添加链接，按钮，可设置为 true。
-          renderMode: 'html', // 浮层的渲染模式，默认以 'html 即额外的 DOM 节点展示 tooltip；
-          backgroundColor: 'rgba(50,50,50,0.7)', // 提示框浮层的背景颜色。
-          borderColor: '#333', // 提示框浮层的边框颜色。
-          borderWidth: 0, // 提示框浮层的边框宽。
-          padding: 5, // 提示框浮层内边距，
-          textStyle: { // 提示框浮层的文本样式。
-            color: '#fff',
-            fontStyle: 'normal',
-            fontWeight: 'normal',
-            fontFamily: 'sans-serif',
-            fontSize: 14,
-          },
-          extraCssText: 'box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);', // 额外附加到浮层的 css 样式
-          confine: false, // 是否将 tooltip 框限制在图表的区域内。
-          formatter: function(arg){
-            return arg[0].name + '的分数是:' + arg[0].data
-          }
-        },
-        geo: {
-          map: 'china',//必须写
-          roam:true,// 拖拽功能；自选关闭开启
-          zoom: 1.235,//地图缩放比例
-          center: [105, 36],//地图位置
-          //地图省份的样式；包括板块颜色和边框颜色
-          itemStyle: {
-            areaColor: '#f5f2f2',
-            borderColor: "#835f5f",
-          },
-          //省份字体样式；包括是否展示，字体大小和颜色
-          // label: {
-          //   normal: {
-          //     show:true,
-          //     fontSize: "11.5",
-          //     color: "rgb(107,102,102)"
-          //   }
-          // },
-          //鼠标划过的高亮设置；包括省份板块颜色和字体等
-          // emphasis: {
-          //   itemStyle: {
-          //     areaColor: '#d0a3a3',
-          //   },
-          //   label: {
-          //     show: true,
-          //     color:"rgb(255,255,255)"
-          //   }
-          // }
-        },
-        visualMap: {
-          min: 0,
-          max: 1500,
-          left: '10%',
-          top: 'bottom',
-          text: ['高','低'],
-          calculable : true,
-          color:['#0b50b9','#FFFFFF']
-        },
-        series: [
-          {
-            zoom: 1.1,
-            map: "china",
-            type: "map",
-            itemStyle: {
-              normal:{
-                borderColor: 'rgba(0, 0, 0, 0.2)'
-              },
-              emphasis:{
-                shadowOffsetX: 0,
-                shadowOffsetY: 0,
-                shadowBlur: 20,
-                borderWidth: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
-              }
-            },
-            label: {
-              normal: {
-                show: true
-              },
-              emphasis: {
-                show: true
-              }
-            },
-            data: [{
-                name: '设备坐标',
-                value: [longti, lati]
-              }],
-          }
-        ],
-        //
-        // series: [{
-        //   type: 'map',
-        //   map: 'china'
-        // }, {
-        //   type: 'scatter',
-        //   coordinateSystem: 'geo',
-        //   data: [{
-        //     name: '设备坐标',
-        //     value: [longti, lati]
-        //   }],
-        //   symbolSize: 10,
-        //   itemStyle: {
-        //     color: '#FF0000'
-        //   }
-        // }]
+    getCenter(points) {
+      let latitudeSum = 0;
+      let longitudeSum = 0;
 
-      })
-      window.onresize=function(){
-        this.entity.resize();
+      points.forEach(point => {
+        latitudeSum += parseFloat(point.lati);
+        longitudeSum += parseFloat(point.longti);
+      });
+
+      return {
+        latitude: latitudeSum / points.length,
+        longitude: longitudeSum / points.length,
+      };
+    },
+    addMarker(point, data) {
+      console.log('marker1', point)
+      const { longitude, latitude } = point;
+      const markerPosition = new this.qq.maps.LatLng( longitude,latitude);
+      // 根据 temperature 设置颜色
+      let color;
+      const temperature = parseInt(data.temperature);
+      if (temperature < 10) {
+        color = 'blue';
+      } else if (temperature < 20) {
+        color = 'green';
+      } else {
+        color = 'red';
       }
 
-    }
+      // 创建标记
+      const marker = new this.qq.maps.Marker({
+        position: markerPosition,
+        map: this.tMap,
+        icon: {
+          path: this.qq.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: color,
+          fillOpacity: 0.8,
+          strokeWeight: 0.4
+        }
+      });
+
+      // 添加到 markers 数组
+      this.markers.push(marker);
+
+      // 创建一个信息窗口
+      const info = new this.qq.maps.InfoWindow({
+        map: this.tMap
+      });
+
+      // 设置窗口的内容，这里可以自定义
+      info.setContent(`
+    <div style="width:200px;padding:10px;">
+      <h4>Device Details</h4>
+      <p>Temperature: ${data.temperature}</p>
+      <p>Humidity: ${data.humidy}</p>
+      <p>Longitude: ${data.longti}</p>
+      <p>Latitude: ${data.lati}</p>
+    </div>
+  `);
+
+      // 添加鼠标悬停事件
+      this.qq.maps.event.addListener(marker, 'mouseover', function() {
+        info.open();
+        info.setPosition(markerPosition);
+      });
+
+      // 添加鼠标移出事件
+      this.qq.maps.event.addListener(marker, 'mouseout', function() {
+        info.close();
+      });
+    },
+
+    async TencentMap() {
+      let _this = this;
+      const { latitude, longitude } = this.getCenter(this.records)
+      TMap("DZYBZ-RWRHI-MPHG2-UBLYL-2STB2-AOBSN").then((qq) => {
+        _this.qq=qq
+        //debugger
+        const myLatlng = new qq.maps.LatLng(longitude, latitude);
+        console.log('lat1',latitude)
+        _this.tMap = new qq.maps.Map(document.getElementById("map-app"), {
+          center: myLatlng,
+          zoom: 13,
+          mapTypeId: qq.maps.MapTypeId.ROADMAP,
+          draggableCursor : 'https://mapapi.qq.com/web/lbs/javascriptV2/demo/img/c1.cur',     //设置鼠标拖拽元素样式
+          draggingCursor : 'https://mapapi.qq.com/web/lbs/javascriptV2/demo/img/c2.cur'       //设置鼠标移动样式
+        });
+
+        _this.drawPoints()
+      });
+    },
   }
-}
+};
 </script>
+
+<style>
+.map-container{
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+#map-app {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+}
+.map-toggle-container {
+  z-index: 99;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.map-toggle {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.map-toggle-button {
+  background-color: #f5f5f5;
+  color: #333;
+  border: none;
+  font-size: 14px;
+  padding: 8px 16px;
+}
+.map-toggle-button:hover {
+  background-color: #e0e0e0;
+}
+.map-toggle-button-active {
+  background-color: #fff;
+}
+</style>
